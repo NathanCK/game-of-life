@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'game_board.dart';
+import 'game_controller_bar.dart';
 
 void main() {
   runApp(const MyApp());
@@ -39,6 +40,8 @@ class _MyHomePageState extends State<MyHomePage> {
         cellSize: 5,
         duration: const Duration(microseconds: 1),
       ),
+      floatingActionButton: const GameControllerBar(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }
