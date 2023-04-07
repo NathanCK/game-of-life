@@ -17,3 +17,5 @@ class GameBoardNextMoveSuccess extends GameBoardState {
   @override
   List<Object> get props => [setEquals];
 }
+
+class GameBoardPauseSuccess extends GameBoardState {}

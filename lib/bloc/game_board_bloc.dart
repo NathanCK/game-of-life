@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:bloc/bloc.dart';
@@ -24,6 +25,7 @@ class GameBoardBloc extends Bloc<GameBoardEvent, GameBoardState> {
         super(GameBoardInitial()) {
     on<GameStarted>(onGameStarted);
     on<GameMoveCompleted>(_onGameMoveCompleted);
+    on<GamePauseRequested>(_onGamePauseRequested);
     add(GameStarted());
   }
 
@@ -125,5 +127,10 @@ class GameBoardBloc extends Bloc<GameBoardEvent, GameBoardState> {
     }
 
     emit(GameBoardNextMoveSuccess(aliveCells));
+  }
+
+  void _onGamePauseRequested(
+      GamePauseRequested event, Emitter<GameBoardState> emit) {
+    emit(GameBoardPauseSuccess());
   }
 }
