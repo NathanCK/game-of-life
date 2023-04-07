@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:bloc/bloc.dart';
+import 'package:conway_game_of_life/patterns/dot_pattern_enum.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 
@@ -131,37 +132,16 @@ class GameBoardBloc extends Bloc<GameBoardEvent, GameBoardState> {
   }
 
   void _generateRandomStartingPoints() {
-    final start1Row =
-        Random().nextInt(rowCount - 3); // make sure there is space.
-    final start1Col = Random().nextInt(colCount - 3);
-    final start1Index = start1Row * colCount + start1Col;
-
-    final start2Row = start1Row + 1;
-    final start2Col = start1Col + 1;
-    final start2Index = start2Row * colCount + start2Col;
-
-    final start3Row = start1Row + 1;
-    final start3Col = start1Col + 2;
-    final start3Index = start3Row * colCount + start3Col;
-
-    final start4Row = start1Row + 2;
-    final start4Col = start1Col;
-    final start4Index = start4Row * colCount + start4Col;
-
-    final start5Row = start1Row + 2;
-    final start5Col = start1Col + 1;
-    final start5Index = start5Row * colCount + start5Col;
-
-    aliveCells.addAll({
-      (start1Index),
-      (start2Index),
-      (start3Index),
-      (start4Index),
-      (start5Index),
-    });
-
-    for (final aliveCell in aliveCells) {
-      cellStatus[aliveCell] = Constant.alive;
+    const allPatterns = DotPattern.values;
+    final pattern = allPatterns[Random().nextInt(allPatterns.length - 1)];
+    final maxSpace = pattern.maxSpace;
+    final startRow = Random().nextInt(rowCount - maxSpace);
+    final startCol = Random().nextInt(colCount - maxSpace);
+    for (int i = 0; i < pattern.points.length; i++) {
+      final p = pattern.points[i];
+      final currentIndex = (startRow + p.x) * colCount + (startCol + p.y);
+      aliveCells.add(currentIndex);
+      cellStatus[currentIndex] = Constant.alive;
     }
   }
 }
