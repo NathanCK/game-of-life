@@ -5,6 +5,9 @@ import 'dart:math';
 import 'package:conway_game_of_life/game_controller_bar.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import 'bloc/game_board_bloc.dart';
 
 class GameBoard extends StatefulWidget {
   final double width;
@@ -29,11 +32,11 @@ class _GameBoardState extends State<GameBoard>
   late Animation<Set<int>> animation;
   late AnimationController controller;
 
-  late final Tween<Set<int>> _rotationTween;
+  late final Tween<Set<int>> _displayTween;
 
-  late final Set<int> aliveCells;
   late final int rowCount;
   late final int colCount;
+  late final GameBoardBloc _gameBoardBloc;
 
   @override
   void initState() {
@@ -42,79 +45,80 @@ class _GameBoardState extends State<GameBoard>
     rowCount = widget.height ~/ widget.cellSize;
     colCount = widget.width ~/ widget.cellSize;
 
-    final start1Row =
-        Random().nextInt(rowCount - 3); // make sure there is space.
-    final start1Col = Random().nextInt(colCount - 3);
-    final start1Index = start1Row * colCount + start1Col;
+    _gameBoardBloc = GameBoardBloc(
+        colCount: colCount, rowCount: rowCount, cellSize: widget.cellSize);
 
-    final start2Row = start1Row + 1;
-    final start2Col = start1Col + 1;
-    final start2Index = start2Row * colCount + start2Col;
-
-    final start3Row = start1Row + 1;
-    final start3Col = start1Col + 2;
-    final start3Index = start3Row * colCount + start3Col;
-
-    final start4Row = start1Row + 2;
-    final start4Col = start1Col;
-    final start4Index = start4Row * colCount + start4Col;
-
-    final start5Row = start1Row + 2;
-    final start5Col = start1Col + 1;
-    final start5Index = start5Row * colCount + start5Col;
-
-    aliveCells = {
-      (start1Index),
-      (start2Index),
-      (start3Index),
-      (start4Index),
-      (start5Index),
-    };
-
-    for (final aliveCell in aliveCells) {
-      cellStatus[aliveCell] = _ALIVE;
-    }
-
-    _rotationTween = Tween(begin: {}, end: {});
+    _displayTween = Tween(begin: {}, end: {});
 
     controller = AnimationController(
       vsync: this,
       duration: widget.duration,
     );
 
-    animation = _rotationTween.animate(controller)
-      ..addListener(() {
-        setState(() {});
-      });
+    animation = _displayTween.animate(controller)..addListener(animateListener);
 
     controller.forward();
-    controller.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        nextGeneration();
-        _rotationTween.end = aliveCells;
-        controller.reset();
-        controller.forward();
-      }
-    });
+    controller.addStatusListener(animateStatusListener);
+  }
+
+  void animateListener() {
+    setState(() {});
+  }
+
+  void animateStatusListener(AnimationStatus status) {
+    if (status == AnimationStatus.completed) {
+      _gameBoardBloc.add(GameMoveCompleted());
+      controller.reset();
+      controller.forward();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: CustomPaint(
-        size: Size(widget.width, widget.height),
-        painter: GameDisplayView(
-          columnCount: colCount,
-          rowCount: rowCount,
-          cellSize: widget.cellSize,
-          aliveColor: Colors.black,
-          deadColor: Colors.white,
-          aliveIndexes: aliveCells,
-        ),
+      body: BlocConsumer<GameBoardBloc, GameBoardState>(
+        bloc: _gameBoardBloc,
+        listener: (context, state) {
+          if (state is GameBoardNextMoveSuccess) {
+            _displayTween.end = state.aliveCellIndexes;
+          }
+        },
+        builder: (context, state) {
+          Set<int> aliveIndexes = {};
+
+          if (state is GameBoardNextMoveSuccess) {
+            aliveIndexes = state.aliveCellIndexes;
+          }
+
+          return CustomPaint(
+            size: Size(widget.width, widget.height),
+            painter: GameDisplayView(
+              columnCount: colCount,
+              rowCount: rowCount,
+              cellSize: widget.cellSize,
+              aliveColor: Colors.black,
+              deadColor: Colors.white,
+              aliveIndexes: aliveIndexes,
+            ),
+          );
+        },
       ),
       floatingActionButton: const GameControllerBar(),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
+  }
+
+  @override
+  void dispose() {
+    animation.removeListener(animateListener);
+    animation.removeStatusListener(animateStatusListener);
+    controller.removeListener(animateListener);
+    controller.removeStatusListener(animateStatusListener);
+
+    controller.dispose();
+    _gameBoardBloc.close();
+
+    super.dispose();
   }
 }
 

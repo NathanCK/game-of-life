@@ -15,5 +15,5 @@ class GameBoardNextMoveSuccess extends GameBoardState {
   const GameBoardNextMoveSuccess(this.aliveCellIndexes);
 
   @override
-  List<Object> get props => [aliveCellIndexes];
+  List<Object> get props => [setEquals];
 }
