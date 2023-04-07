@@ -33,15 +33,11 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
 
-    return Scaffold(
-      body: GameBoard(
-        width: screenSize.width,
-        height: screenSize.height,
-        cellSize: 5,
-        duration: const Duration(microseconds: 1),
-      ),
-      floatingActionButton: const GameControllerBar(),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+    return GameBoard(
+      width: screenSize.width,
+      height: screenSize.height,
+      cellSize: 5,
+      duration: const Duration(microseconds: 1),
     );
   }
 }
