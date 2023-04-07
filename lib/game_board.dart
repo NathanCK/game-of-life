@@ -2,6 +2,7 @@
 
 import 'dart:math';
 
+import 'package:conway_game_of_life/game_controller_bar.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
@@ -165,16 +166,20 @@ class _GameBoardState extends State<GameBoard>
 
   @override
   Widget build(BuildContext context) {
-    return CustomPaint(
-      size: Size(widget.width, widget.height),
-      painter: GameDisplayView(
-        columnCount: colCount,
-        rowCount: rowCount,
-        cellSize: widget.cellSize,
-        aliveColor: Colors.black,
-        deadColor: Colors.white,
-        aliveIndexes: aliveCells,
+    return Scaffold(
+      body: CustomPaint(
+        size: Size(widget.width, widget.height),
+        painter: GameDisplayView(
+          columnCount: colCount,
+          rowCount: rowCount,
+          cellSize: widget.cellSize,
+          aliveColor: Colors.black,
+          deadColor: Colors.white,
+          aliveIndexes: aliveCells,
+        ),
       ),
+      floatingActionButton: const GameControllerBar(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
 }
