@@ -14,3 +14,5 @@ class GameStarted extends GameBoardEvent {}
 class GamePauseRequested extends GameBoardEvent {}
 
 class GameResumeRequested extends GameBoardEvent {}
+
+class GameResetRequested extends GameBoardEvent {}

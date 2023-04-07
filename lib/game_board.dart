@@ -96,6 +96,11 @@ class _GameBoardState extends State<GameBoard>
           if (state is GameBoardResumeSuccess) {
             controller.forward();
           }
+
+          if (state is GameBoardResetSuccess) {
+            aliveIndexes = state.aliveCellIndexes;
+            controller.stop();
+          }
         },
         builder: (context, state) {
           if (state is GameBoardNextMoveSuccess) {

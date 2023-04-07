@@ -21,3 +21,7 @@ class GameBoardNextMoveSuccess extends GameBoardState {
 class GameBoardPauseSuccess extends GameBoardState {}
 
 class GameBoardResumeSuccess extends GameBoardState {}
+
+class GameBoardResetSuccess extends GameBoardNextMoveSuccess {
+  const GameBoardResetSuccess(super.aliveCellIndexes);
+}

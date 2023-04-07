@@ -43,7 +43,9 @@ class GameControllerBar extends StatelessWidget {
             iconWidget: SvgPicture.asset(
               'assets/icons/reset.svg',
             ),
-            onPressed: () {},
+            onPressed: () {
+              _gameBoardBloc.add(GameResetRequested());
+            },
           ),
         ],
       ),

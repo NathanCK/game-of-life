@@ -27,6 +27,7 @@ class GameBoardBloc extends Bloc<GameBoardEvent, GameBoardState> {
     on<GameMoveCompleted>(_onGameMoveCompleted);
     on<GamePauseRequested>(_onGamePauseRequested);
     on<GameResumeRequested>(_onGameResumeRequested);
+    on<GameResetRequested>(_onGameResetRequested);
     add(GameStarted());
   }
 
@@ -94,6 +95,34 @@ class GameBoardBloc extends Bloc<GameBoardEvent, GameBoardState> {
   }
 
   void onGameStarted(GameStarted event, Emitter<GameBoardState> emit) {
+    _generateRandomStartingPoints();
+
+    emit(GameBoardNextMoveSuccess(aliveCells));
+  }
+
+  void _onGamePauseRequested(
+      GamePauseRequested event, Emitter<GameBoardState> emit) {
+    emit(GameBoardPauseSuccess());
+  }
+
+  void _onGameResumeRequested(
+      GameResumeRequested event, Emitter<GameBoardState> emit) {
+    emit(GameBoardResumeSuccess());
+  }
+
+  void _onGameResetRequested(
+      GameResetRequested event, Emitter<GameBoardState> emit) {
+    aliveCells.clear();
+
+    for (int i = 0; i < cellStatus.length; i++) {
+      cellStatus[i] = Constant.dead;
+    }
+
+    _generateRandomStartingPoints();
+    emit(GameBoardResetSuccess(aliveCells));
+  }
+
+  void _generateRandomStartingPoints() {
     final start1Row =
         Random().nextInt(rowCount - 3); // make sure there is space.
     final start1Col = Random().nextInt(colCount - 3);
@@ -126,17 +155,5 @@ class GameBoardBloc extends Bloc<GameBoardEvent, GameBoardState> {
     for (final aliveCell in aliveCells) {
       cellStatus[aliveCell] = Constant.alive;
     }
-
-    emit(GameBoardNextMoveSuccess(aliveCells));
-  }
-
-  void _onGamePauseRequested(
-      GamePauseRequested event, Emitter<GameBoardState> emit) {
-    emit(GameBoardPauseSuccess());
-  }
-
-  void _onGameResumeRequested(
-      GameResumeRequested event, Emitter<GameBoardState> emit) {
-    emit(GameBoardResumeSuccess());
   }
 }
