@@ -1,11 +1,14 @@
+import 'package:conway_game_of_life/bloc/game_board_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class GameControllerBar extends StatelessWidget {
   final double hight = 40; // TODO: should resize based on screen size.
   final double wight = 160;
+  final GameBoardBloc _gameBoardBloc;
 
-  const GameControllerBar({super.key});
+  const GameControllerBar({super.key, required GameBoardBloc gameBoardBloc})
+      : _gameBoardBloc = gameBoardBloc;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +33,9 @@ class GameControllerBar extends StatelessWidget {
             iconWidget: const Icon(
               Icons.pause,
             ),
-            onPressed: () {},
+            onPressed: () {
+              _gameBoardBloc.add(GamePauseRequested());
+            },
           ),
           _ControlButton(
             iconWidget: SvgPicture.asset(

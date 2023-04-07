@@ -38,6 +38,8 @@ class _GameBoardState extends State<GameBoard>
   late final int colCount;
   late final GameBoardBloc _gameBoardBloc;
 
+  Set<int> aliveIndexes = {};
+
   @override
   void initState() {
     super.initState();
@@ -82,10 +84,16 @@ class _GameBoardState extends State<GameBoard>
           if (state is GameBoardNextMoveSuccess) {
             _displayTween.end = state.aliveCellIndexes;
           }
+
+          if (state is GameBoardNextMoveSuccess) {
+            aliveIndexes = state.aliveCellIndexes;
+          }
+
+          if (state is GameBoardPauseSuccess) {
+            controller.stop();
+          }
         },
         builder: (context, state) {
-          Set<int> aliveIndexes = {};
-
           if (state is GameBoardNextMoveSuccess) {
             aliveIndexes = state.aliveCellIndexes;
           }
@@ -103,7 +111,9 @@ class _GameBoardState extends State<GameBoard>
           );
         },
       ),
-      floatingActionButton: const GameControllerBar(),
+      floatingActionButton: GameControllerBar(
+        gameBoardBloc: _gameBoardBloc,
+      ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
