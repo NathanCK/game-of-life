@@ -92,6 +92,10 @@ class _GameBoardState extends State<GameBoard>
           if (state is GameBoardPauseSuccess) {
             controller.stop();
           }
+
+          if (state is GameBoardResumeSuccess) {
+            controller.forward();
+          }
         },
         builder: (context, state) {
           if (state is GameBoardNextMoveSuccess) {

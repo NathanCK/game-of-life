@@ -27,7 +27,9 @@ class GameControllerBar extends StatelessWidget {
             iconWidget: const Icon(
               Icons.play_arrow,
             ),
-            onPressed: () {},
+            onPressed: () {
+              _gameBoardBloc.add(GameResumeRequested());
+            },
           ),
           _ControlButton(
             iconWidget: const Icon(

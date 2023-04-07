@@ -26,6 +26,7 @@ class GameBoardBloc extends Bloc<GameBoardEvent, GameBoardState> {
     on<GameStarted>(onGameStarted);
     on<GameMoveCompleted>(_onGameMoveCompleted);
     on<GamePauseRequested>(_onGamePauseRequested);
+    on<GameResumeRequested>(_onGameResumeRequested);
     add(GameStarted());
   }
 
@@ -132,5 +133,10 @@ class GameBoardBloc extends Bloc<GameBoardEvent, GameBoardState> {
   void _onGamePauseRequested(
       GamePauseRequested event, Emitter<GameBoardState> emit) {
     emit(GameBoardPauseSuccess());
+  }
+
+  void _onGameResumeRequested(
+      GameResumeRequested event, Emitter<GameBoardState> emit) {
+    emit(GameBoardResumeSuccess());
   }
 }
