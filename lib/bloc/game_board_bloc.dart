@@ -16,19 +16,23 @@ class GameBoardBloc extends Bloc<GameBoardEvent, GameBoardState> {
   final double cellSize;
   final List<int> cellStatus;
   final Set<int> aliveCells = {};
+  final bool _shouldAutoStart;
 
   GameBoardBloc({
     required this.colCount,
     required this.rowCount,
     required this.cellSize,
+    bool shouldAutoStart = false,
   })  : cellStatus = List.filled(rowCount * colCount, Constant.dead),
-        super(GameBoardInitial()) {
-    on<GameStarted>(onGameStarted);
+        _shouldAutoStart = shouldAutoStart,
+        super(GameNotYetStarted()) {
+    on<GameInitialized>(_onGameInitialized);
     on<GameMoveCompleted>(_onGameMoveCompleted);
     on<GamePauseRequested>(_onGamePauseRequested);
     on<GameResumeRequested>(_onGameResumeRequested);
     on<GameResetRequested>(_onGameResetRequested);
-    add(GameStarted());
+
+    add(GameInitialized());
   }
 
   void _onGameMoveCompleted(
@@ -94,10 +98,14 @@ class GameBoardBloc extends Bloc<GameBoardEvent, GameBoardState> {
     }
   }
 
-  void onGameStarted(GameStarted event, Emitter<GameBoardState> emit) {
+  void _onGameInitialized(GameInitialized event, Emitter<GameBoardState> emit) {
     _generateRandomStartingPoints();
 
-    emit(GameBoardNextMoveSuccess(aliveCells));
+    if (_shouldAutoStart) {
+      emit(GameBoardNextMoveSuccess(aliveCells));
+    } else {
+      emit(GameBoardInitialSuccess(aliveCells));
+    }
   }
 
   void _onGamePauseRequested(

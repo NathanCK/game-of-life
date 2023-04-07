@@ -1,7 +1,5 @@
 // ignore_for_file: constant_identifier_names
 
-import 'dart:math';
-
 import 'package:conway_game_of_life/game_controller_bar.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
@@ -14,6 +12,7 @@ class GameBoard extends StatefulWidget {
   final double height;
   final double cellSize;
   final Duration duration;
+  final bool shouldAutoStart;
 
   const GameBoard({
     super.key,
@@ -21,6 +20,7 @@ class GameBoard extends StatefulWidget {
     required this.width,
     required this.cellSize,
     required this.duration,
+    this.shouldAutoStart = false,
   });
 
   @override
@@ -48,7 +48,11 @@ class _GameBoardState extends State<GameBoard>
     colCount = widget.width ~/ widget.cellSize;
 
     _gameBoardBloc = GameBoardBloc(
-        colCount: colCount, rowCount: rowCount, cellSize: widget.cellSize);
+      colCount: colCount,
+      rowCount: rowCount,
+      cellSize: widget.cellSize,
+      shouldAutoStart: widget.shouldAutoStart,
+    );
 
     _displayTween = Tween(begin: {}, end: {});
 
@@ -89,17 +93,14 @@ class _GameBoardState extends State<GameBoard>
             aliveIndexes = state.aliveCellIndexes;
           }
 
-          if (state is GameBoardPauseSuccess) {
+          if (state is GameBoardResetSuccess ||
+              state is GameBoardInitialSuccess ||
+              state is GameBoardPauseSuccess) {
             controller.stop();
           }
 
           if (state is GameBoardResumeSuccess) {
             controller.forward();
-          }
-
-          if (state is GameBoardResetSuccess) {
-            aliveIndexes = state.aliveCellIndexes;
-            controller.stop();
           }
         },
         builder: (context, state) {

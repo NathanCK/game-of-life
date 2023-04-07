@@ -9,7 +9,7 @@ abstract class GameBoardEvent extends Equatable {
 
 class GameMoveCompleted extends GameBoardEvent {}
 
-class GameStarted extends GameBoardEvent {}
+class GameInitialized extends GameBoardEvent {}
 
 class GamePauseRequested extends GameBoardEvent {}
 

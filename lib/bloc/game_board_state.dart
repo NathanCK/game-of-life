@@ -7,7 +7,11 @@ abstract class GameBoardState extends Equatable {
   List<Object> get props => [];
 }
 
-class GameBoardInitial extends GameBoardState {}
+class GameNotYetStarted extends GameBoardState {}
+
+class GameBoardInitialSuccess extends GameBoardNextMoveSuccess {
+  const GameBoardInitialSuccess(super.aliveCellIndexes);
+}
 
 class GameBoardNextMoveSuccess extends GameBoardState {
   final Set<int> aliveCellIndexes;
