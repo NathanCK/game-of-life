@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:bloc/bloc.dart';
 import 'package:conway_game_of_life/patterns/angle_enum.dart';
+import 'package:conway_game_of_life/patterns/cell.dart';
 import 'package:conway_game_of_life/patterns/dot_pattern_enum.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
@@ -13,7 +14,7 @@ class GameBoardBloc extends Bloc<GameBoardEvent, GameBoardState> {
   int colCount;
   int rowCount;
   double cellSize;
-  final Set<int> aliveCells = {};
+  final Set<Cell> aliveCells = {};
   final bool _shouldAutoStart;
 
   GameBoardBloc({
@@ -28,6 +29,7 @@ class GameBoardBloc extends Bloc<GameBoardEvent, GameBoardState> {
     on<GamePauseRequested>(_onGamePauseRequested);
     on<GameResumeRequested>(_onGameResumeRequested);
     on<GameResetRequested>(_onGameResetRequested);
+    on<GameBoardSizeChanged>(_onGameBoardSizeChanged);
 
     add(GameInitialized());
   }
@@ -39,58 +41,61 @@ class GameBoardBloc extends Bloc<GameBoardEvent, GameBoardState> {
   }
 
   void _calculateNextMove() {
-    final Set<int> deadCellCandidates = {};
-    final Set<int> aliveCellCandidates = {};
+    final Set<Cell> deadCellCandidates = {};
+    final Set<Cell> aliveCellCandidates = {};
     for (int r = 0; r < rowCount; r++) {
       for (int c = 0; c < colCount; c++) {
-        final currentIndex = r * colCount + c;
+        final currentCell = Cell(r, c);
+        final Set<Cell> neighborCells = {};
 
-        final topIndex = r - 1 >= 0 ? (r - 1) * colCount + c : -1;
-        final topLeftIndex =
-            r - 1 >= 0 && c - 1 >= 0 ? (r - 1) * colCount + (c - 1) : -1;
-        final topRightIndex =
-            r - 1 >= 0 && c + 1 < colCount ? (r - 1) * colCount + (c + 1) : -1;
-        final leftIndex = c - 1 >= 0 ? r * colCount + (c - 1) : -1;
-        final rightIndex = c + 1 < colCount ? r * colCount + (c + 1) : -1;
-        final botIndex = r + 1 < rowCount ? (r + 1) * colCount + c : -1;
-        final botLeftIndex =
-            r + 1 < rowCount && c - 1 >= 0 ? (r + 1) * colCount + (c - 1) : -1;
-        final botRightIndex = r + 1 < rowCount && c + 1 < colCount
-            ? (r + 1) * colCount + (c + 1)
-            : -1;
+        if (r - 1 >= 0) {
+          neighborCells.add(Cell(r - 1, c));
+        }
 
-        final indexes = {
-          topIndex,
-          topLeftIndex,
-          topRightIndex,
-          leftIndex,
-          rightIndex,
-          botIndex,
-          botLeftIndex,
-          botRightIndex
-        }..remove(-1);
+        if (r - 1 >= 0 && c - 1 >= 0) {
+          neighborCells.add(Cell(r - 1, c - 1));
+        }
+
+        if (r - 1 >= 0 && c + 1 < colCount) {
+          neighborCells.add(Cell(r - 1, c + 1));
+        }
+
+        if (c - 1 >= 0) {
+          neighborCells.add(Cell(r, c - 1));
+        }
+
+        if (c + 1 < colCount) {
+          neighborCells.add(Cell(r, c + 1));
+        }
+
+        if (r + 1 < rowCount) {
+          neighborCells.add(Cell(r + 1, c));
+        }
+
+        if (r + 1 < rowCount && c - 1 >= 0) {
+          neighborCells.add(Cell(r + 1, c - 1));
+        }
+
+        if (r + 1 < rowCount && c + 1 < colCount) {
+          neighborCells.add(Cell(r + 1, c + 1));
+        }
 
         int aliveNeighbors = 0;
 
-        for (int neighborIndex in indexes) {
-          if (aliveCells.contains(neighborIndex)) aliveNeighbors++;
+        for (Cell neighborCell in neighborCells) {
+          if (aliveCells.contains(neighborCell)) aliveNeighbors++;
         }
 
         if (aliveNeighbors < 2 || aliveNeighbors > 3) {
-          deadCellCandidates.add(currentIndex);
-        } else if (aliveNeighbors == 3 && !aliveCells.contains(currentIndex)) {
-          aliveCellCandidates.add(currentIndex);
+          deadCellCandidates.add(currentCell);
+        } else if (aliveNeighbors == 3 && !aliveCells.contains(currentCell)) {
+          aliveCellCandidates.add(currentCell);
         }
       }
     }
 
-    for (final deadCellIndex in deadCellCandidates) {
-      aliveCells.remove(deadCellIndex);
-    }
-
-    for (final aliveCellIndex in aliveCellCandidates) {
-      aliveCells.add(aliveCellIndex);
-    }
+    aliveCells.removeAll(deadCellCandidates);
+    aliveCells.addAll(aliveCellCandidates);
   }
 
   void _onGameInitialized(GameInitialized event, Emitter<GameBoardState> emit) {
@@ -136,9 +141,17 @@ class GameBoardBloc extends Bloc<GameBoardEvent, GameBoardState> {
       final startCol = Random().nextInt(colCount - maxSpace);
       for (int i = 0; i < pattern.cells.length; i++) {
         final p = pattern.cells[i];
-        final currentIndex = (startRow + p.row) * colCount + (startCol + p.col);
-        aliveCells.add(currentIndex);
+        final startRowIndex = startRow + p.row;
+        final startColIndex = startCol + p.col;
+        aliveCells.add(Cell(startRowIndex, startColIndex));
       }
     }
+  }
+
+  void _onGameBoardSizeChanged(
+      GameBoardSizeChanged event, Emitter<GameBoardState> emit) {
+    colCount = event.newColCount;
+    rowCount = event.newRowCount;
+    cellSize = event.newCellSize;
   }
 }

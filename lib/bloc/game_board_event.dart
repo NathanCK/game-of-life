@@ -16,3 +16,18 @@ class GamePauseRequested extends GameBoardEvent {}
 class GameResumeRequested extends GameBoardEvent {}
 
 class GameResetRequested extends GameBoardEvent {}
+
+class GameBoardSizeChanged extends GameBoardEvent {
+  final int newColCount;
+  final int newRowCount;
+  final double newCellSize;
+
+  const GameBoardSizeChanged({
+    required this.newColCount,
+    required this.newRowCount,
+    required this.newCellSize,
+  });
+
+  @override
+  List<Object> get props => [newColCount, newCellSize, newRowCount];
+}

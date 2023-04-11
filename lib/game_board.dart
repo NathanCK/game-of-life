@@ -1,6 +1,5 @@
-// ignore_for_file: constant_identifier_names
-
 import 'package:conway_game_of_life/game_controller_bar.dart';
+import 'package:conway_game_of_life/patterns/cell.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -29,16 +28,16 @@ class GameBoard extends StatefulWidget {
 
 class _GameBoardState extends State<GameBoard>
     with TickerProviderStateMixin<GameBoard> {
-  late Animation<Set<int>> animation;
+  late Animation<Set<Cell>> animation;
   late AnimationController controller;
 
-  late final Tween<Set<int>> _displayTween;
+  late final Tween<Set<Cell>> _displayTween;
 
-  late final int rowCount;
-  late final int colCount;
+  late int rowCount;
+  late int colCount;
   late final GameBoardBloc _gameBoardBloc;
 
-  Set<int> aliveIndexes = {};
+  Set<Cell> aliveCells = {};
 
   @override
   void initState() {
@@ -67,6 +66,23 @@ class _GameBoardState extends State<GameBoard>
     controller.addStatusListener(animateStatusListener);
   }
 
+  @override
+  void didUpdateWidget(covariant GameBoard oldWidget) {
+    if (oldWidget.width != widget.width || oldWidget.height != widget.height) {
+      _calculateGameBoardSize();
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  void _calculateGameBoardSize() {
+    _gameBoardBloc.add(GameBoardSizeChanged(
+        newCellSize: widget.cellSize,
+        newColCount: colCount,
+        newRowCount: rowCount));
+    rowCount = widget.height ~/ widget.cellSize;
+    colCount = widget.width ~/ widget.cellSize;
+  }
+
   void animateListener() {
     setState(() {});
   }
@@ -90,7 +106,7 @@ class _GameBoardState extends State<GameBoard>
           }
 
           if (state is GameBoardNextMoveSuccess) {
-            aliveIndexes = state.aliveCellIndexes;
+            aliveCells = state.aliveCellIndexes;
           }
 
           if (state is GameBoardResetSuccess ||
@@ -105,7 +121,7 @@ class _GameBoardState extends State<GameBoard>
         },
         builder: (context, state) {
           if (state is GameBoardNextMoveSuccess) {
-            aliveIndexes = state.aliveCellIndexes;
+            aliveCells = state.aliveCellIndexes;
           }
 
           return CustomPaint(
@@ -116,7 +132,7 @@ class _GameBoardState extends State<GameBoard>
               cellSize: widget.cellSize,
               aliveColor: Colors.black,
               deadColor: Colors.white,
-              aliveIndexes: aliveIndexes,
+              aliveCells: aliveCells,
             ),
           );
         },
@@ -151,7 +167,7 @@ class GameDisplayView extends CustomPainter {
   final int columnCount;
   final Color aliveColor;
   final Color deadColor;
-  final Set<int> aliveIndexes;
+  final Set<Cell> aliveCells;
 
   GameDisplayView({
     required this.rowCount,
@@ -159,7 +175,7 @@ class GameDisplayView extends CustomPainter {
     required this.columnCount,
     required this.aliveColor,
     required this.deadColor,
-    required this.aliveIndexes,
+    required this.aliveCells,
     this.cellGapSize = 1,
   }) : painter = Paint()
           ..strokeWidth = 1
@@ -167,16 +183,10 @@ class GameDisplayView extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    painter.color = deadColor;
+
     for (int r = 0; r < rowCount; r++) {
       for (int c = 0; c < columnCount; c++) {
-        final i = r * columnCount + c;
-
-        if (aliveIndexes.contains(i)) {
-          painter.color = aliveColor;
-        } else {
-          painter.color = deadColor;
-        }
-
         canvas.drawRRect(
             RRect.fromRectAndRadius(
                 Rect.fromLTWH(
@@ -188,6 +198,20 @@ class GameDisplayView extends CustomPainter {
                 const Radius.circular(1.0)),
             painter);
       }
+    }
+
+    painter.color = aliveColor;
+    for (var aliveCell in aliveCells) {
+      canvas.drawRRect(
+          RRect.fromRectAndRadius(
+              Rect.fromLTWH(
+                getLeft1(aliveCell.col),
+                getTop1(aliveCell.row),
+                cellSize - cellGapSize,
+                cellSize - cellGapSize,
+              ),
+              const Radius.circular(1.0)),
+          painter);
     }
   }
 

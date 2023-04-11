@@ -14,7 +14,7 @@ class GameBoardInitialSuccess extends GameBoardNextMoveSuccess {
 }
 
 class GameBoardNextMoveSuccess extends GameBoardState {
-  final Set<int> aliveCellIndexes;
+  final Set<Cell> aliveCellIndexes;
 
   const GameBoardNextMoveSuccess(this.aliveCellIndexes);
 
