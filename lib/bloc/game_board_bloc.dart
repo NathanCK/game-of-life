@@ -6,16 +6,13 @@ import 'package:conway_game_of_life/patterns/dot_pattern_enum.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 
-import '../constant.dart';
-
 part 'game_board_event.dart';
 part 'game_board_state.dart';
 
 class GameBoardBloc extends Bloc<GameBoardEvent, GameBoardState> {
-  final int colCount;
-  final int rowCount;
-  final double cellSize;
-  final List<int> cellStatus;
+  int colCount;
+  int rowCount;
+  double cellSize;
   final Set<int> aliveCells = {};
   final bool _shouldAutoStart;
 
@@ -24,8 +21,7 @@ class GameBoardBloc extends Bloc<GameBoardEvent, GameBoardState> {
     required this.rowCount,
     required this.cellSize,
     bool shouldAutoStart = false,
-  })  : cellStatus = List.filled(rowCount * colCount, Constant.dead),
-        _shouldAutoStart = shouldAutoStart,
+  })  : _shouldAutoStart = shouldAutoStart,
         super(GameNotYetStarted()) {
     on<GameInitialized>(_onGameInitialized);
     on<GameMoveCompleted>(_onGameMoveCompleted);
@@ -77,7 +73,7 @@ class GameBoardBloc extends Bloc<GameBoardEvent, GameBoardState> {
         int aliveNeighbors = 0;
 
         for (int neighborIndex in indexes) {
-          aliveNeighbors += cellStatus[neighborIndex];
+          if (aliveCells.contains(neighborIndex)) aliveNeighbors++;
         }
 
         if (aliveNeighbors < 2 || aliveNeighbors > 3) {
@@ -89,12 +85,10 @@ class GameBoardBloc extends Bloc<GameBoardEvent, GameBoardState> {
     }
 
     for (final deadCellIndex in deadCellCandidates) {
-      cellStatus[deadCellIndex] = Constant.dead;
       aliveCells.remove(deadCellIndex);
     }
 
     for (final aliveCellIndex in aliveCellCandidates) {
-      cellStatus[aliveCellIndex] = Constant.alive;
       aliveCells.add(aliveCellIndex);
     }
   }
@@ -123,10 +117,6 @@ class GameBoardBloc extends Bloc<GameBoardEvent, GameBoardState> {
       GameResetRequested event, Emitter<GameBoardState> emit) {
     aliveCells.clear();
 
-    for (int i = 0; i < cellStatus.length; i++) {
-      cellStatus[i] = Constant.dead;
-    }
-
     _generateRandomStartingPoints();
     emit(GameBoardResetSuccess(aliveCells));
   }
@@ -148,7 +138,6 @@ class GameBoardBloc extends Bloc<GameBoardEvent, GameBoardState> {
         final p = pattern.cells[i];
         final currentIndex = (startRow + p.row) * colCount + (startCol + p.col);
         aliveCells.add(currentIndex);
-        cellStatus[currentIndex] = Constant.alive;
       }
     }
   }
