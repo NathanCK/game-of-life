@@ -1,9 +1,6 @@
-import 'dart:math';
-
 import 'package:conway_game_of_life/patterns/all_patterns.dart';
 import 'package:conway_game_of_life/patterns/angle_enum.dart';
 import 'package:conway_game_of_life/patterns/dot_pattern.dart';
-import 'package:equatable/equatable.dart';
 
 enum DotPatternType {
   glider,
@@ -168,12 +165,3 @@ extension DotPatternTypeExtension on DotPatternType {
 //   final List<Cell> points;
 // }
 
-class Cell extends Equatable {
-  final int row;
-  final int col;
-
-  const Cell(this.row, this.col);
-
-  @override
-  List<Object?> get props => [row, col];
-}
