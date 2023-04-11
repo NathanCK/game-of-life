@@ -139,7 +139,7 @@ class GameBoardBloc extends Bloc<GameBoardEvent, GameBoardState> {
     final startCol = Random().nextInt(colCount - maxSpace);
     for (int i = 0; i < pattern.points.length; i++) {
       final p = pattern.points[i];
-      final currentIndex = (startRow + p.x) * colCount + (startCol + p.y);
+      final currentIndex = (startRow + p.row) * colCount + (startCol + p.col);
       aliveCells.add(currentIndex);
       cellStatus[currentIndex] = Constant.alive;
     }

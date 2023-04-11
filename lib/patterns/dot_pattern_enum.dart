@@ -117,16 +117,17 @@ enum DotPattern {
   final List<Point> points;
 
   int get maxSpace =>
-      points.fold(0, (previousValue, p) => max(previousValue, max(p.x, p.y))) +
+      points.fold(
+          0, (previousValue, p) => max(previousValue, max(p.row, p.col))) +
       1;
 }
 
 class Point extends Equatable {
-  final int x;
-  final int y;
+  final int row;
+  final int col;
 
-  const Point(this.x, this.y);
+  const Point(this.row, this.col);
 
   @override
-  List<Object?> get props => [x, y];
+  List<Object?> get props => [row, col];
 }
