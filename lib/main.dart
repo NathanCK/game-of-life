@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'game_board.dart';
-import 'game_controller_bar.dart';
 
 void main() {
   runApp(const MyApp());
