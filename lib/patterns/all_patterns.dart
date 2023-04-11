@@ -1,5 +1,5 @@
+import 'package:conway_game_of_life/patterns/cell.dart';
 import 'package:conway_game_of_life/patterns/dot_pattern.dart';
-import 'package:conway_game_of_life/patterns/dot_pattern_enum.dart';
 
 class Glider extends DotPattern {
   Glider({super.angle})
