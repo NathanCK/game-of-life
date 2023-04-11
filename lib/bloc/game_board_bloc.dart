@@ -1,7 +1,7 @@
-import 'dart:async';
 import 'dart:math';
 
 import 'package:bloc/bloc.dart';
+import 'package:conway_game_of_life/patterns/angle_enum.dart';
 import 'package:conway_game_of_life/patterns/dot_pattern_enum.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
@@ -132,16 +132,24 @@ class GameBoardBloc extends Bloc<GameBoardEvent, GameBoardState> {
   }
 
   void _generateRandomStartingPoints() {
-    const allPatterns = DotPattern.values;
-    final pattern = allPatterns[Random().nextInt(allPatterns.length - 1)];
-    final maxSpace = pattern.maxSpace;
-    final startRow = Random().nextInt(rowCount - maxSpace);
-    final startCol = Random().nextInt(colCount - maxSpace);
-    for (int i = 0; i < pattern.points.length; i++) {
-      final p = pattern.points[i];
-      final currentIndex = (startRow + p.row) * colCount + (startCol + p.col);
-      aliveCells.add(currentIndex);
-      cellStatus[currentIndex] = Constant.alive;
+    final totalPatterns = Random().nextInt(20) + 10;
+
+    for (var count = 0; count < totalPatterns; count++) {
+      const allPatterns = DotPatternType.values;
+      final patternType = allPatterns[Random().nextInt(allPatterns.length - 1)];
+      const allDegree = Angle.values;
+      final randomDegree = allDegree[Random().nextInt(allDegree.length - 1)];
+      final pattern = DotPatternTypeExtension.getDotPatternObject(
+          patternType, randomDegree);
+      final maxSpace = pattern.maxSpace;
+      final startRow = Random().nextInt(rowCount - maxSpace);
+      final startCol = Random().nextInt(colCount - maxSpace);
+      for (int i = 0; i < pattern.cells.length; i++) {
+        final p = pattern.cells[i];
+        final currentIndex = (startRow + p.row) * colCount + (startCol + p.col);
+        aliveCells.add(currentIndex);
+        cellStatus[currentIndex] = Constant.alive;
+      }
     }
   }
 }
