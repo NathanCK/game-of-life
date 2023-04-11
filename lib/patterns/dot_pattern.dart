@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:conway_game_of_life/patterns/angle_enum.dart';
-import 'package:conway_game_of_life/patterns/dot_pattern_enum.dart';
+import 'package:conway_game_of_life/patterns/cell.dart';
 import 'package:equatable/equatable.dart';
 
 abstract class DotPattern extends Equatable {
