@@ -75,12 +75,13 @@ class _GameBoardState extends State<GameBoard>
   }
 
   void _calculateGameBoardSize() {
+    rowCount = widget.height ~/ widget.cellSize;
+    colCount = widget.width ~/ widget.cellSize;
+
     _gameBoardBloc.add(GameBoardSizeChanged(
         newCellSize: widget.cellSize,
         newColCount: colCount,
         newRowCount: rowCount));
-    rowCount = widget.height ~/ widget.cellSize;
-    colCount = widget.width ~/ widget.cellSize;
   }
 
   void animateListener() {
