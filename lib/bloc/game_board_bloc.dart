@@ -1,11 +1,14 @@
 import 'dart:math';
 
 import 'package:bloc/bloc.dart';
+import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:conway_game_of_life/constant.dart';
 import 'package:conway_game_of_life/patterns/angle_enum.dart';
 import 'package:conway_game_of_life/patterns/cell.dart';
 import 'package:conway_game_of_life/patterns/dot_pattern_enum.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
+import 'package:synchronized/synchronized.dart';
 
 part 'game_board_event.dart';
 part 'game_board_state.dart';
@@ -16,6 +19,8 @@ class GameBoardBloc extends Bloc<GameBoardEvent, GameBoardState> {
   double cellSize;
   final Set<Cell> aliveCells = {};
   final bool _shouldAutoStart;
+  List<List<int>> _gameBoard;
+  final Lock _screenLock = Lock();
 
   GameBoardBloc({
     required this.colCount,
@@ -23,20 +28,28 @@ class GameBoardBloc extends Bloc<GameBoardEvent, GameBoardState> {
     required this.cellSize,
     bool shouldAutoStart = false,
   })  : _shouldAutoStart = shouldAutoStart,
+        _gameBoard = List.generate(rowCount,
+            (_) => List.filled(colCount, Constant.dead, growable: true)),
         super(GameNotYetStarted()) {
     on<GameInitialized>(_onGameInitialized);
-    on<GameMoveCompleted>(_onGameMoveCompleted);
+    on<GameMoveCompleted>(
+      _onGameMoveCompleted,
+      transformer: sequential(),
+    );
     on<GamePauseRequested>(_onGamePauseRequested);
     on<GameResumeRequested>(_onGameResumeRequested);
     on<GameResetRequested>(_onGameResetRequested);
-    on<GameBoardSizeChanged>(_onGameBoardSizeChanged);
-
+    on<GameBoardSizeChanged>(
+      _onGameBoardSizeChanged,
+      transformer: sequential(),
+    );
     add(GameInitialized());
   }
 
-  void _onGameMoveCompleted(
-      GameMoveCompleted event, Emitter<GameBoardState> emit) {
-    _calculateNextMove();
+  Future<void> _onGameMoveCompleted(
+      GameMoveCompleted event, Emitter<GameBoardState> emit) async {
+    await _screenLock.synchronized(() => _calculateNextMove());
+
     emit(GameBoardNextMoveSuccess(aliveCells));
   }
 
@@ -45,53 +58,66 @@ class GameBoardBloc extends Bloc<GameBoardEvent, GameBoardState> {
     final Set<Cell> aliveCellCandidates = {};
     for (int r = 0; r < rowCount; r++) {
       for (int c = 0; c < colCount; c++) {
-        final currentCell = Cell(r, c);
-        final Set<Cell> neighborCells = {};
-
-        if (r - 1 >= 0) {
-          neighborCells.add(Cell(r - 1, c));
-        }
-
-        if (r - 1 >= 0 && c - 1 >= 0) {
-          neighborCells.add(Cell(r - 1, c - 1));
-        }
-
-        if (r - 1 >= 0 && c + 1 < colCount) {
-          neighborCells.add(Cell(r - 1, c + 1));
-        }
-
-        if (c - 1 >= 0) {
-          neighborCells.add(Cell(r, c - 1));
-        }
-
-        if (c + 1 < colCount) {
-          neighborCells.add(Cell(r, c + 1));
-        }
-
-        if (r + 1 < rowCount) {
-          neighborCells.add(Cell(r + 1, c));
-        }
-
-        if (r + 1 < rowCount && c - 1 >= 0) {
-          neighborCells.add(Cell(r + 1, c - 1));
-        }
-
-        if (r + 1 < rowCount && c + 1 < colCount) {
-          neighborCells.add(Cell(r + 1, c + 1));
-        }
-
         int aliveNeighbors = 0;
 
-        for (Cell neighborCell in neighborCells) {
-          if (aliveCells.contains(neighborCell)) aliveNeighbors++;
+        if (r - 1 >= 0 && _gameBoard[r - 1][c] == Constant.alive) {
+          aliveNeighbors++;
         }
 
-        if (aliveNeighbors < 2 || aliveNeighbors > 3) {
+        if (r - 1 >= 0 &&
+            c - 1 >= 0 &&
+            _gameBoard[r - 1][c - 1] == Constant.alive) {
+          aliveNeighbors++;
+        }
+
+        if (r - 1 >= 0 &&
+            c + 1 < colCount &&
+            _gameBoard[r - 1][c + 1] == Constant.alive) {
+          aliveNeighbors++;
+        }
+
+        if (c - 1 >= 0 && _gameBoard[r][c - 1] == Constant.alive) {
+          aliveNeighbors++;
+        }
+
+        if (c + 1 < colCount && _gameBoard[r][c + 1] == Constant.alive) {
+          aliveNeighbors++;
+        }
+
+        if (r + 1 < rowCount && _gameBoard[r + 1][c] == Constant.alive) {
+          aliveNeighbors++;
+        }
+
+        if (r + 1 < rowCount &&
+            c - 1 >= 0 &&
+            _gameBoard[r + 1][c - 1] == Constant.alive) {
+          aliveNeighbors++;
+        }
+
+        if (r + 1 < rowCount &&
+            c + 1 < colCount &&
+            _gameBoard[r + 1][c + 1] == Constant.alive) {
+          aliveNeighbors++;
+        }
+
+        final currentCell = Cell(r, c);
+
+        if (_gameBoard[r][c] == Constant.alive &&
+            (aliveNeighbors < 2 || aliveNeighbors > 3)) {
           deadCellCandidates.add(currentCell);
-        } else if (aliveNeighbors == 3 && !aliveCells.contains(currentCell)) {
+        } else if (_gameBoard[r][c] != Constant.alive && aliveNeighbors == 3) {
           aliveCellCandidates.add(currentCell);
         }
       }
+    }
+
+    for (var deadCellCandidate in deadCellCandidates) {
+      _gameBoard[deadCellCandidate.row][deadCellCandidate.col] = Constant.dead;
+    }
+
+    for (var aliveCellCandidate in aliveCellCandidates) {
+      _gameBoard[aliveCellCandidate.row][aliveCellCandidate.col] =
+          Constant.alive;
     }
 
     aliveCells.removeAll(deadCellCandidates);
@@ -121,6 +147,8 @@ class GameBoardBloc extends Bloc<GameBoardEvent, GameBoardState> {
   void _onGameResetRequested(
       GameResetRequested event, Emitter<GameBoardState> emit) {
     aliveCells.clear();
+    _gameBoard = List.generate(
+        rowCount, (_) => List.filled(colCount, Constant.dead, growable: true));
 
     _generateRandomStartingPoints();
     emit(GameBoardResetSuccess(aliveCells));
@@ -144,14 +172,43 @@ class GameBoardBloc extends Bloc<GameBoardEvent, GameBoardState> {
         final startRowIndex = startRow + p.row;
         final startColIndex = startCol + p.col;
         aliveCells.add(Cell(startRowIndex, startColIndex));
+        _gameBoard[startRowIndex][startColIndex] = Constant.alive;
       }
     }
   }
 
-  void _onGameBoardSizeChanged(
-      GameBoardSizeChanged event, Emitter<GameBoardState> emit) {
-    colCount = event.newColCount;
-    rowCount = event.newRowCount;
-    cellSize = event.newCellSize;
+  Future<void> _onGameBoardSizeChanged(
+      GameBoardSizeChanged event, Emitter<GameBoardState> emit) async {
+    await _screenLock.synchronized(() {
+      final currentMapRowCount = _gameBoard.length;
+      final currentMapColCount = _gameBoard[0].length;
+      if (event.newColCount > currentMapColCount &&
+          event.newRowCount > currentMapRowCount) {
+        for (var i = 0; i < event.newRowCount; i++) {
+          if (i < currentMapRowCount) {
+            _gameBoard[i].addAll(List.filled(
+                event.newColCount - currentMapColCount, Constant.dead));
+          } else {
+            _gameBoard.add(
+                List.filled(event.newColCount, Constant.dead, growable: true));
+          }
+        }
+      } else if (event.newColCount > currentMapColCount) {
+        for (var i = 0; i < _gameBoard.length; i++) {
+          _gameBoard[i].addAll(List.filled(
+              event.newColCount - currentMapColCount, Constant.dead));
+        }
+      } else if (event.newRowCount > currentMapRowCount) {
+        final extraRowCount = List.generate(
+            event.newRowCount - currentMapRowCount,
+            (_) =>
+                List.filled(currentMapColCount, Constant.dead, growable: true));
+        _gameBoard.addAll(extraRowCount);
+      }
+
+      colCount = event.newColCount;
+      rowCount = event.newRowCount;
+      cellSize = event.newCellSize;
+    });
   }
 }
