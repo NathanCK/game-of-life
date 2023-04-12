@@ -35,8 +35,8 @@ class _MyHomePageState extends State<MyHomePage> {
     return GameBoard(
       width: screenSize.width,
       height: screenSize.height,
-      cellSize: 5,
-      duration: const Duration(microseconds: 1),
+      cellSize: 7,
+      duration: const Duration(milliseconds: 500),
     );
   }
 }
