@@ -12,6 +12,7 @@ class GameBoard extends StatefulWidget {
   final double cellSize;
   final Duration duration;
   final bool shouldAutoStart;
+  final bool showControlPanel;
 
   const GameBoard({
     super.key,
@@ -20,6 +21,7 @@ class GameBoard extends StatefulWidget {
     required this.cellSize,
     required this.duration,
     this.shouldAutoStart = false,
+    this.showControlPanel = true,
   });
 
   @override
@@ -138,9 +140,11 @@ class _GameBoardState extends State<GameBoard>
           );
         },
       ),
-      floatingActionButton: GameControllerBar(
-        gameBoardBloc: _gameBoardBloc,
-      ),
+      floatingActionButton: widget.showControlPanel
+          ? GameControllerBar(
+              gameBoardBloc: _gameBoardBloc,
+            )
+          : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
