@@ -44,9 +44,7 @@ extension DotPatternTypeExtension on DotPatternType {
         return Boat(angle: angle);
       case DotPatternType.tub:
         return Tub(angle: angle);
-      default:
-        throw UnsupportedError('currently don\'t support $type type');
-    }
+      }
   }
 }
 
