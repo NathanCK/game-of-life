@@ -17,7 +17,7 @@ abstract class DotPattern extends Equatable {
     final originalMap = List.generate(
         maxRow,
         (rowIndex) => List.generate(maxCol, (colIndex) {
-              if (originalCellSet.contains(Cell(rowIndex, colIndex))) {
+              if (originalCellSet.contains((row: rowIndex, col: colIndex))) {
                 return 1;
               }
 
@@ -55,7 +55,7 @@ abstract class DotPattern extends Equatable {
     for (int i = 0; i < rotatedMap.length; i++) {
       for (int j = 0; j < rotatedMap[0].length; j++) {
         if (rotatedMap[i][j] == 1) {
-          rotatedCells.add(Cell(i, j));
+          rotatedCells.add((row: i, col: j));
         }
       }
     }

@@ -100,7 +100,7 @@ class GameBoardBloc extends Bloc<GameBoardEvent, GameBoardState> {
           aliveNeighbors++;
         }
 
-        final currentCell = Cell(r, c);
+        final Cell currentCell = (row: r, col: c);
 
         if (_gameBoard[r][c] == Constant.alive &&
             (aliveNeighbors < 2 || aliveNeighbors > 3)) {
@@ -171,7 +171,7 @@ class GameBoardBloc extends Bloc<GameBoardEvent, GameBoardState> {
         final p = pattern.cells[i];
         final startRowIndex = startRow + p.row;
         final startColIndex = startCol + p.col;
-        aliveCells.add(Cell(startRowIndex, startColIndex));
+        aliveCells.add((row: startRowIndex, col: startColIndex));
         _gameBoard[startRowIndex][startColIndex] = Constant.alive;
       }
     }
