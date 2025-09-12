@@ -1,6 +1,7 @@
+import 'package:conway_game_of_life/constant.dart';
 import 'package:flutter/material.dart';
 
-import 'game_board.dart';
+import 'game_of_life_board.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,28 +16,11 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const MyHomePage(),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  @override
-  Widget build(BuildContext context) {
-    final screenSize = MediaQuery.of(context).size;
-
-    return GameBoard(
-      width: screenSize.width,
-      height: screenSize.height,
-      cellSize: 7,
-      duration: const Duration(milliseconds: 500),
+      home: const GameOfLife(
+        cellSize: DefaultGameSettings.cellSize,
+        showControlPanel: DefaultGameSettings.showControlPanel,
+        autoStart: DefaultGameSettings.autoStart,
+      ),
     );
   }
 }
