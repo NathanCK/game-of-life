@@ -5,6 +5,7 @@ import 'package:conway_game_of_life/game_of_life_engine.dart';
 import 'package:conway_game_of_life/game_of_life_loop.dart';
 import 'package:conway_game_of_life/painters/cells_painter.dart';
 import 'package:conway_game_of_life/painters/game_board_painter.dart';
+import 'package:conway_game_of_life/theme/game_of_life_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -119,8 +120,20 @@ class _GameOfLifeBoardState extends State<_GameOfLifeBoard>
 
   @override
   Widget build(BuildContext context) {
-    final controlBar = widget.showControlPanel ? GameControllerBar() : null;
-    final gridBackground = _buildGridBackground();
+    final themeData = Theme.of(context).extension<GameOfLifeTheme>() ??
+        (Theme.maybeBrightnessOf(context) == Brightness.dark
+            ? DefaultDarkTheme.themeData
+            : DefaultLightTheme.themeData);
+    final deadCellColor = themeData.deadCellColor;
+    final aliveCellColor = themeData.activeCellColor;
+    final gridLineColor = themeData.gridColor;
+
+    final gridBackground = _buildGridBackground(gridLineColor: gridLineColor);
+    final controlBar = widget.showControlPanel
+        ? GameControllerBar(
+            buttonColor: themeData.controlButtonColor,
+          )
+        : null;
 
     return BlocListener<GameControlCubit, GameControlState>(
       listener: (context, state) {
@@ -140,11 +153,14 @@ class _GameOfLifeBoardState extends State<_GameOfLifeBoard>
         }
       },
       child: Scaffold(
-        backgroundColor: DefaultLightColors.dead,
+        backgroundColor: deadCellColor,
         body: AnimatedBuilder(
           animation: _engine,
           builder: (context, child) {
-            final cellsBoard = _buildCellsView(child: child);
+            final cellsBoard = _buildCellsView(
+              aliveCellColor: aliveCellColor,
+              child: child,
+            );
 
             return cellsBoard;
           },
@@ -156,7 +172,7 @@ class _GameOfLifeBoardState extends State<_GameOfLifeBoard>
     );
   }
 
-  Widget _buildCellsView({Widget? child}) {
+  Widget _buildCellsView({required Color aliveCellColor, Widget? child}) {
     return RepaintBoundary(
       child: CustomPaint(
         willChange: true,
@@ -165,7 +181,7 @@ class _GameOfLifeBoardState extends State<_GameOfLifeBoard>
           columnCount: widget.colCount,
           rowCount: widget.rowCount,
           cellSize: widget.cellSize,
-          aliveColor: DefaultLightColors.alive,
+          aliveColor: aliveCellColor,
           generation: _engine.generation,
           aliveCells: _engine.aliveCells,
           cellGapSize: _defaultCellGap,
@@ -175,7 +191,9 @@ class _GameOfLifeBoardState extends State<_GameOfLifeBoard>
     );
   }
 
-  Widget _buildGridBackground() {
+  Widget _buildGridBackground({
+    required Color gridLineColor,
+  }) {
     return RepaintBoundary(
       child: CustomPaint(
         size: Size(widget.width, widget.height),
@@ -183,7 +201,7 @@ class _GameOfLifeBoardState extends State<_GameOfLifeBoard>
           columnCount: widget.colCount,
           rowCount: widget.rowCount,
           cellSize: widget.cellSize,
-          lineColor: DefaultLightColors.gridLine,
+          lineColor: gridLineColor,
           cellGapSize: _defaultCellGap,
         ),
       ),

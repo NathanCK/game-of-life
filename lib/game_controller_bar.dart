@@ -4,7 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 class GameControllerBar extends StatelessWidget {
-  const GameControllerBar({super.key});
+  final Color buttonColor;
+  const GameControllerBar({super.key, required this.buttonColor});
 
   @override
   Widget build(BuildContext context) {
@@ -28,10 +29,17 @@ class GameControllerBar extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             spacing: 4.0,
             children: [
-              _PlayButton(),
+              _PlayButton(
+                color: buttonColor,
+              ),
               _ControlButton(
+                color: buttonColor,
                 iconWidget: SvgPicture.asset(
                   'assets/icons/reset.svg',
+                  colorFilter: ColorFilter.mode(
+                    buttonColor,
+                    BlendMode.srcIn,
+                  ),
                 ),
                 onPressed: () {
                   context.read<GameControlCubit>().resetGame();
@@ -46,6 +54,10 @@ class GameControllerBar extends StatelessWidget {
 }
 
 class _PlayButton extends StatefulWidget {
+  final Color color;
+
+  const _PlayButton({required this.color});
+
   @override
   State<_PlayButton> createState() => _PlayButtonState();
 }
@@ -85,6 +97,7 @@ class _PlayButtonState extends State<_PlayButton>
             : context.read<GameControlCubit>().startGame;
 
         return _ControlButton(
+          color: widget.color,
           iconWidget: AnimatedIcon(
             icon: AnimatedIcons.play_pause,
             progress: _animation,
@@ -107,10 +120,12 @@ class _ControlButton extends StatelessWidget {
   static const double _iconButtonSize = 30;
   final void Function()? onPressed;
   final Widget iconWidget;
+  final Color color;
 
   const _ControlButton({
     this.onPressed,
     required this.iconWidget,
+    required this.color,
   });
 
   @override
@@ -120,6 +135,7 @@ class _ControlButton extends StatelessWidget {
       iconSize: _iconButtonSize,
       splashRadius: 2,
       onPressed: onPressed,
+      color: color,
       icon: Center(
         child: Container(
           padding: EdgeInsets.zero,

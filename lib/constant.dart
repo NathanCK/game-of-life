@@ -1,3 +1,4 @@
+import 'package:conway_game_of_life/theme/game_of_life_theme.dart';
 import 'package:flutter/material.dart';
 
 class Constant {
@@ -12,14 +13,30 @@ class DefaultGameSettings {
   static const Duration speed = Duration(milliseconds: 500);
 }
 
-class DefaultLightColors {
+class DefaultLightTheme {
+  static final themeData = GameOfLifeTheme(
+    activeCellColor: DefaultLightTheme.alive,
+    deadCellColor: DefaultLightTheme.dead,
+    gridColor: DefaultLightTheme.gridLine,
+    controlButtonColor: DefaultLightTheme.controlButton,
+  );
+
   static const Color alive = Colors.black;
   static final Color dead = Colors.grey[50]!;
   static const Color gridLine = Colors.white;
+  static final Color controlButton = Colors.grey[850]!;
 }
 
-class DefaultDarkColors {
-  static const Color alive = Colors.black;
-  static final Color dead = Colors.grey[850]!;
-  static const Color gridLine = Colors.white;
+class DefaultDarkTheme {
+  static final themeData = GameOfLifeTheme(
+    activeCellColor: DefaultDarkTheme.alive,
+    deadCellColor: DefaultDarkTheme.dead,
+    gridColor: DefaultDarkTheme.gridLine,
+    controlButtonColor: DefaultDarkTheme.controlButton,
+  );
+
+  static const Color alive = Colors.white;
+  static final Color dead = Colors.grey[700]!;
+  static final Color gridLine = Colors.grey[600]!;
+  static final Color controlButton = Colors.grey[850]!;
 }

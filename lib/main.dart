@@ -13,8 +13,15 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Conway\'s Game of Life',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+      theme: ThemeData.light().copyWith(
+        extensions: [
+          DefaultLightTheme.themeData,
+        ],
+      ),
+      darkTheme: ThemeData.dark().copyWith(
+        extensions: [
+          DefaultDarkTheme.themeData,
+        ],
       ),
       home: const GameOfLife(
         cellSize: DefaultGameSettings.cellSize,
