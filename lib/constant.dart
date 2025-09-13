@@ -22,7 +22,7 @@ class DefaultLightTheme {
   );
 
   static const Color alive = Colors.black;
-  static final Color dead = Colors.grey[50]!;
+  static final Color dead = Colors.grey[200]!;
   static const Color gridLine = Colors.white;
   static final Color controlButton = Colors.grey[850]!;
 }
